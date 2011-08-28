@@ -13,16 +13,7 @@ from BeautifulSoup import BeautifulSoup
 from urlparse import urlparse, urljoin
 from urllib import urlretrieve
 
-'''
-exitwp - Wordpress xml exports to Jekykll blog format conversion
 
-Tested with Wordpress 3.1 and jekyll master branch from 2011-03-26
-pandoc is required to be installed if conversion from html will be done.
-
-'''
-######################################################
-# Configration
-######################################################
 config=yaml.load(file('config.yaml','r'))
 wp_exports=config['wp_exports']
 build_dir=config['build_dir']
@@ -35,25 +26,7 @@ item_type_filter = set(config['item_type_filter'])
 item_field_filter = config['item_field_filter']
 date_fmt=config['date_format']
 
-def html2fmt(html, target_format):
-    target_format='markdown'
-    if target_format=='html':
-        return html
-    else:
-        # This is like very stupid but I was having troubles with unicode encodings and process.POpen
-        f=codecs.open('pandoc.in', 'w', encoding='utf-8')
-        f.write(html)
-        f.close()
-        call(["pandoc","-f","html","-o", "pandoc.out", "-t",target_format, "pandoc.in"])
-        f=codecs.open('pandoc.out', 'r', encoding='utf-8')
-        lines=[]
-        for line in f: lines.append(line)
-        f.close()
-        os.remove('pandoc.in')
-        os.remove('pandoc.out')
-        return ''.join(lines)
-
-def parse_wp_xml(file):
+def parse_wordpress_xml(file):
     ns = {
         '':'', #this is the default namespace
         'excerpt':"{http://wordpress.org/export/1.1/excerpt/}",
@@ -70,7 +43,7 @@ def parse_wp_xml(file):
     root=tree.parse(file)
     c=root.find('channel')
 
-    def parse_header():
+    def parse_blog_header():
         return {
             "title": unicode(c.find('title').text),
             "link": unicode(c.find('link').text),
@@ -96,6 +69,10 @@ def parse_wp_xml(file):
                 tag=''
                 if q.find(':') > 0: namespace, tag=q.split(':',1)
                 else: tag=q
+
+                print ns[namespace]+tag
+                print i.find(ns[namespace]+tag)
+                print i.find(ns[namespace]+tag).text
                 result=i.find(ns[namespace]+tag).text
                 if unicode_wrap: result=unicode(result)
                 return result
@@ -131,7 +108,7 @@ def parse_wp_xml(file):
         return export_items
 
     return {
-        'header': parse_header(),
+        'header': parse_blog_header(),
         'items': parse_items(),
     }
 
@@ -296,7 +273,7 @@ def write_jekyll(data, target_format):
 
 wp_exports=glob(wp_exports+'/*.xml')
 for wpe in wp_exports:
-    data=parse_wp_xml(wpe)
+    data=parse_wordpress_xml(wpe)
     write_jekyll(data, target_format)
 
 print 'done'
