@@ -5,6 +5,7 @@ require 'fileutils'
 require 'date'
 require 'pathname'
 require 'uri'
+require 'open3'
 
 # ExitWP converts WordPress XML export files to Jekyll blog formats. Based
 # on exitwp.py (https://github.com/thomasf/exitwp) by Thomas Frössman
@@ -41,6 +42,7 @@ class ExitWP
     end
 
     attr_reader :config
+    attr_reader :document
 
     def parse
       channels = document / './/channel'
@@ -49,7 +51,7 @@ class ExitWP
 
     class NodeParser
       def initialize(config, node)
-        @config, @node = node
+        @config, @node = config, node
       end
 
       attr_reader :config, :node
@@ -165,7 +167,29 @@ class ExitWP
         html
       else
         # NOTE: This assumes UTF-8 all the way through.
-      %x(#{config.pandoc} -f html -t #{target_format})
+        command = "#{config.pandoc} -f html -t #{target_format}"
+        output = error = nil
+        Open3.popen3(command) { |i, o, e, t|
+          i.write html
+          i.close
+          output = o.read.chomp
+          error = e.read.chomp
+        }
+
+        unless error.empty?
+          raise <<-EOS
+Error parsing HTML.
+Command:
+#{command}
+
+Error:
+#{error}
+
+Input:
+#{html}
+          EOS
+        end
+        output
       end
     end
     private :convert_html
@@ -223,7 +247,14 @@ class ExitWP
           if config.item_type_filter.include? item['type']
             nil
           else
-            config.stderr.puts "Unknown item type #{item['type']}."
+            config.stderr.puts <<-EOS
+
+Unknown item type on entry.
+Type:   #{item['type']}
+Date:   #{item['date']}
+Entry:  #{item['wp_id']}
+Slug:   #{item['slug']}
+            EOS
           end
         end
 
@@ -242,20 +273,22 @@ class ExitWP
           taxonomies[config.taxonomies[taxonomy] || taxonomy].push(*values)
         }
 
-        File.open(fn, 'w') { |f|
-          f.write "---\n"
-          f.write yaml_header.to_yaml if yaml_header.size > 0
-          f.write taxonomies.to_yaml if taxonomies.size > 0
-          f.write "---\n\n"
-          f.write convert_html(item['body'], config.target_format)
-        }
+        if fn
+          File.open(fn, 'w') { |f|
+            f.write "---\n"
+            f.write yaml_header.to_yaml if yaml_header.size > 0
+            f.write taxonomies.to_yaml if taxonomies.size > 0
+            f.write "---\n\n"
+            f.write convert_html(item['body'], config.target_format)
+          }
+        end
       end
 
       config.stdout.puts unless config.quiet
     end
 
     def channel_path
-      infix = config.path_infix || 'jekyll'
+      infix = config.channel_infix
       name = header['link'].sub(/^https?/, '').sub(/[^-A-Za-z0-9_.]/, '')
       File.expand_path(File.join(config.build_dir, infix, name))
     end
@@ -275,18 +308,20 @@ class ExitWP
         uid = ""
 
         if date_prefix
-          date = DateTime.strptime(item['date'], config.date_fmt)
+          date = DateTime.strptime(item['date'], config.date_format)
           uid << date.strftime("%Y-%m-%d") << '-'
         end
 
-        title = item['slug']
-        title = item['title'] if title.nil? or title.empty?
-        if title.nil? or title.empty?
+        if item['slug']
+          title = item['slug']
+        elsif item['title']
+          title = item['title']
+        else
           warn "Could not find a title for an entry."
           title = 'untitled'
         end
         title.gsub!(/\s+/, '_')
-        title.gsub!(/^[-A-Za-z0-9_]/, '')
+        title.gsub!(/[^-A-Za-z0-9_]/, '')
         uid << title
         new_uid = uid
 

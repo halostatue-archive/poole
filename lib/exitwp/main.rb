@@ -4,7 +4,7 @@ require 'exitwp'
 require 'main'
 require 'set'
 
-module ExitWP::Runner
+module ExitWP::Main
   class Config
     unless defined? Parser
       begin
@@ -159,16 +159,18 @@ in the current directory.
     end
   end
 
+  attr_reader :yaml_config
+
   def run
     config_file = params['config-file'].value
-    @yaml_config = ExitWP::Runner::Config::Parser.load_file(config_file)
+    @yaml_config = ExitWP::Main::Config::Parser.load_file(config_file)
     set_option('quiet', :default => false)
     set_option('pandoc', :default => 'pandoc')
-    yaml_config['stdout'] = runner.stdout
-    yaml_config['stderr'] = runner.stderr
+    yaml_config['stdout'] = stdout
+    yaml_config['stderr'] = stderr
 
-    config = ExitWP::Runner::Config.new(yaml_config)
-    exit_wp = ExitWP.new(config, self)
+    config = ExitWP::Main::Config.new(yaml_config)
+    ExitWP.new(config).run
 
 #   # you can set the exit_status at anytime.  this status is used when
 #   # exiting the program.  exceptions cause this to be ext_failure if, and

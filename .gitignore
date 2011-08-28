@@ -1,4 +1,5 @@
 .rvmrc
+build/
 pkg/
 *.swp
 *.pyc

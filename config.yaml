@@ -15,6 +15,9 @@ date_format: '%Y-%m-%d %H:%M:%S'
 # Try to download and reloacate all images locally to the blog.
 download_images: False
 
+# The channel infix
+channel_infix: "jekyll"
+
 # Item types we don't want to import.
 item_type_filter: {attachment, nav_menu_item}
 
