@@ -7,13 +7,13 @@ require 'pathname'
 require 'uri'
 require 'open3'
 
-# ExitWP converts WordPress XML export files to Jekyll blog formats. Based
+# Poole converts WordPress XML export files to Jekyll blog formats. Based
 # on exitwp.py (https://github.com/thomasf/exitwp) by Thomas Frössman
 # (https://github.com/thomasf).
 #
 # Tested with a Wordpress 2.8.1 export file and jekyll 0.11.0. pandoc is
 # required to be installed if conversion from HTML will be done.
-class ExitWP
+class Poole
   VERSION = '1.0.0'
 
   def initialize(config)

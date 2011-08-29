@@ -1,10 +1,10 @@
 # -*- ruby encoding: utf-8 -*-
 
-require 'exitwp'
+require 'poole'
 require 'main'
 require 'set'
 
-module ExitWP::Main
+module Poole::Main
   class Config
     unless defined? Parser
       begin
@@ -92,10 +92,10 @@ module ExitWP::Main
 end
 
 Main do
-  program 'exitwp'
+  program 'poole'
 
   # a short description of program functionality, auto-set and used in usage
-# synopsis "exitwp [config-file]"
+  # synopsis "poole [config-file]"
 
   # long description of program functionality, used in usage iff set
   description "Convert a WordPress export file to Jekyll."
@@ -104,7 +104,7 @@ Main do
   author 'austin@rubyforge.org'
 
   # used in usage
-  version ExitWP::VERSION
+  version Poole::VERSION
 
   # the logger should be a Logger object, something 'write'-able, or a string
   # which will be used to open the logger.  the logger_level specifies the
@@ -163,14 +163,14 @@ in the current directory.
 
   def run
     config_file = params['config-file'].value
-    @yaml_config = ExitWP::Main::Config::Parser.load_file(config_file)
+    @yaml_config = Poole::Main::Config::Parser.load_file(config_file)
     set_option('quiet', :default => false)
     set_option('pandoc', :default => 'pandoc')
     yaml_config['stdout'] = stdout
     yaml_config['stderr'] = stderr
 
-    config = ExitWP::Main::Config.new(yaml_config)
-    ExitWP.new(config).run
+    config = Poole::Main::Config.new(yaml_config)
+    Poole.new(config).run
 
 #   # you can set the exit_status at anytime.  this status is used when
 #   # exiting the program.  exceptions cause this to be ext_failure if, and

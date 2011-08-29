@@ -1,0 +1,71 @@
+= poole
+
+== Description
+
+Poole is a tool for migrating from one or more
+{WordPress}[http://wordpress.org] blogs to
+{Jekyll}[https://github.com/mojombo/jekyll] using the WordPress
+{export}[http://codex.wordpress.org/Tools_Export_Screen] XML format.
+
+By default, it will attempt to convert as much information as possible from
+WordPress, but can also be configured to filter the amount of data it converts.
+
+Poole has been ported to Ruby from Thomas Frössman's
+{Exitwp}[https://github.com/thomasf/exitwp] Python script.
+
+=== About the Name
+
+Poole is Dr Jekyll's butler who, upon noticing the reclusiveness
+and changes of his master, goes to Mr. Utterson with the fear that his master
+has been murdered and his murderer, Mr. Hyde, is residing in the chambers.
+Poole serves Jekyll faithfully, and attempts to do a good job and be loyal to
+his master. Yet events finally drive him into joining forces with Utterson to
+discover the truth.—<em>{Wikipedia}[http://en.wikipedia.org/wiki/Strange_Case_of_Dr_Jekyll_and_Mr_Hyde#Poole]</em>
+
+== Where
+
+* {GitHub}[https://github.com/halostatue/poole]
+
+== Synopsis
+
+  gem install poole
+
+Installing the Poole gem will provide you a new executable, +poole+, that you
+can then use to convert one or more WordPress export files to Jekyll. To use
+it, do the following in the directory where you want to convert your WordPress
+blog to a Jekyll blog.
+
+1. Export one or more WordPress blogs using the Tools/Export screen in the
+   admin pages.
+2. Create a directory +wordpress-xml+ and put the exported WordPress export XML
+   files in that directory.
+3. Create a configuration file with <tt>poole config create</tt>.
+4. Run the converter with <tt>poole convert [config-file]</tt>.
+5. You should now have all of the blogs converted into separate directories
+   under the +build+ directory.
+
+Note that if Poole cannot find the +pandoc+ binary, the files will be written
+as HTML. The best results will be obtained if you have
+{pandoc}[http://johnmacfarlane.net/pandoc/] installed. It's easiest to install
++pandoc+ if you have the
+{Haskell Platform}[http://hackage.haskell.org/platform//] installed. At that
+point, it's a simple matter of typing:
+
+  cabal install pandoc
+
+== Configuration/Customization
+
+See the `configuration file <https://github.com/thomasf/exitwp/blob/master/config.yaml>`_ for all configurable options.
+
+Some things like custom handling of non standard post types is not fully configurable through the config file. You might have to modify the `source code <https://github.com/thomasf/exitwp/blob/master/exitwp.py>`_ to add custom parsing behaviour.
+
+== Known issues
+* Target file names are some times less than optimal.
+* Rewriting of image/attachment links if they are downloaded would be a good
+  feature.
+* Meaningful translation/filtering of WordPress publish statuses into something
+  that usable within a fairly standard jekyll setup.
+* There will probably be issues when migrating non utf-8 encoded wordpress dump
+  files (if they exist).
+
+:include: License.rdoc

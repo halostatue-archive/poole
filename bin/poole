@@ -9,4 +9,4 @@
 # Therefore, no warnings.
 #!ruby -w
 
-require 'exitwp/main'
+require 'poole/main'
