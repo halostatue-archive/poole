@@ -8,13 +8,8 @@ Hoe.plugin :doofus
 Hoe.plugin :gemspec
 Hoe.plugin :git
 
-Hoe.spec 'diff-lcs' do
-  self.rubyforge_name = 'ruwiki'
-
+Hoe.spec 'poole' do
   developer('Austin Ziegler', 'austin@rubyforge.org')
-
-  self.remote_rdoc_dir = 'diff-lcs/rdoc'
-  self.rsync_args << ' --exclude=statsvn/'
 
   self.history_file = 'History.rdoc'
   self.readme_file = 'README.rdoc'
@@ -22,6 +17,7 @@ Hoe.spec 'diff-lcs' do
 
   self.extra_deps << ['nokogiri', '~> 1.5.0']
   self.extra_deps << ['main', '~> 4.7.3']
+  self.extra_deps << ['agio', '~> 0.5' ]
   self.extra_dev_deps << ['rspec', '~> 2.0']
   self.extra_dev_deps << ['hoe-doofus', '~> 1.0']
   self.extra_dev_deps << ['hoe-gemspec', '~> 1.0']
